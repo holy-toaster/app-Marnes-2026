@@ -3,13 +3,43 @@ package com.gabriel.estante.data.repository
 import com.gabriel.estante.data.local.Livro
 import com.gabriel.estante.data.local.LivroDao
 import com.gabriel.estante.data.local.StatusLeitura
+import com.gabriel.estante.data.remote.OpenLibraryApi
+import com.gabriel.estante.data.remote.ResultadoBusca
 import kotlinx.coroutines.flow.Flow
 
 /**
  * Ponto único de acesso aos livros para os ViewModels.
- * Hoje só usa o banco local; depois também vai usar a Open Library.
+ * Usa o banco local (Room) para a estante e a Open Library para buscar livros novos.
  */
-class LivroRepository(private val dao: LivroDao) {
+class LivroRepository(
+    private val dao: LivroDao,
+    private val api: OpenLibraryApi = OpenLibraryApi()
+) {
+
+    /**
+     * Busca livros pelo título na Open Library. Nunca lança exceção:
+     * devolve ResultadoBusca.Sucesso ou ResultadoBusca.Erro.
+     *
+     * Exemplo de uso em um ViewModel:
+     *
+     *   class BuscaViewModel(private val repo: LivroRepository) : ViewModel() {
+     *       var resultado by mutableStateOf<ResultadoBusca?>(null)
+     *           private set
+     *
+     *       fun buscar(titulo: String) {
+     *           viewModelScope.launch {                       // corrotina ligada ao ViewModel
+     *               resultado = repo.buscarLivros(titulo)     // a tela só observa "resultado"
+     *           }
+     *       }
+     *   }
+     *
+     *   // Na tela: when (val r = viewModel.resultado) {
+     *   //     is ResultadoBusca.Sucesso -> mostra r.livros
+     *   //     is ResultadoBusca.Erro    -> mostra mensagem conforme r.motivo
+     *   //     null                      -> ainda não buscou
+     *   // }
+     */
+    suspend fun buscarLivros(titulo: String): ResultadoBusca = api.buscarPorTitulo(titulo)
 
     /** Livros de uma prateleira, atualizados automaticamente. */
     fun livrosPorStatus(status: StatusLeitura): Flow<List<Livro>> =
