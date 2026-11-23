@@ -27,6 +27,8 @@ data class Livro(
     val notaPessoal: Int = 0,
     // Texto livre escrito pelo usuário
     val anotacao: String = "",
+    // Progresso da leitura em porcentagem, de 0 a 100. O repositório garante esse limite.
+    val progresso: Int = 0,
     // Identificador do livro na Open Library (ex.: "/works/OL45804W")
     val olId: String
 )
