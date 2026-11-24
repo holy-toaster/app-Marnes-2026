@@ -26,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.gabriel.estante.ui.busca.BuscaScreen
+import com.gabriel.estante.ui.estante.EstanteScreen
 import com.gabriel.estante.ui.theme.Ambar
 import com.gabriel.estante.ui.theme.BarraNavegacao
 
@@ -73,7 +74,7 @@ fun EstanteNavHost() {
             startDestination = Destino.ESTANTE.rota,
             modifier = Modifier.padding(padding)
         ) {
-            composable(Destino.ESTANTE.rota) { TelaTemporaria("Estante") }
+            composable(Destino.ESTANTE.rota) { EstanteScreen() }
             composable(Destino.PESQUISA.rota) { BuscaScreen() }
             composable(Destino.MAIS_AVALIADOS.rota) { TelaTemporaria("Mais Avaliados") }
         }
