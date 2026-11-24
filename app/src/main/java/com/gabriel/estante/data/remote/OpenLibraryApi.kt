@@ -50,6 +50,40 @@ private data class RespostaObra(
     val description: JsonElement? = null
 )
 
+// Linha que é só um separador ("--", "---", "----"...)
+private val SEPARADOR = Regex("""(?m)^[ 	]*-{2,}[ 	]*$""")
+// Link em Markdown: [texto](endereço)
+private val LINK_MARKDOWN = Regex("""\[([^\]]*)\]\([^)]*\)""")
+
+/**
+ * Limpa a sinopse da Open Library antes de mostrar na tela.
+ *
+ * Antes (texto cru da API):
+ *   Um faroleiro encontra um diário. Leia [mais](https://exemplo.com/farol).
+ *
+ *   ----------
+ *   See also:
+ *   * [Outro livro](https://exemplo.com/outro)
+ * Depois:
+ *   Um faroleiro encontra um diário. Leia mais.
+ *
+ * Passos: 1) corta tudo a partir de um separador, de "See also:" ou de "([source]";
+ * 2) troca [texto](endereço) só por "texto"; 3) tira espaços e linhas em branco das pontas.
+ * Se sobrar texto vazio, quem chama deve esconder a seção.
+ */
+fun limparSinopse(texto: String): String {
+    // 1) Acha o ponto de corte mais cedo entre os marcadores de rodapé
+    val corte = listOfNotNull(
+        SEPARADOR.find(texto)?.range?.first,
+        texto.indexOf("See also:").takeIf { it >= 0 },
+        texto.indexOf("([source]").takeIf { it >= 0 }
+    ).minOrNull()
+    val semRodape = if (corte != null) texto.substring(0, corte) else texto
+
+    // 2) [texto](endereço) -> texto   e   3) tira as sobras das pontas
+    return semRodape.replace(LINK_MARKDOWN, "$1").trim()
+}
+
 /**
  * Acesso à API de busca da Open Library.
  * Nenhuma função daqui lança exceção: sempre devolve um [ResultadoBusca].
@@ -112,7 +146,7 @@ class OpenLibraryApi(
                 is JsonPrimitive -> descricao.contentOrNull                       // texto simples
                 is JsonObject -> descricao["value"]?.jsonPrimitive?.contentOrNull // objeto com "value"
                 else -> null
-            }?.trim()
+            }?.let { limparSinopse(it) } // tira Markdown e rodapés de fontes
 
             if (texto.isNullOrEmpty()) {
                 ResultadoSinopse.Erro(ErroBusca.RESPOSTA_VAZIA)
