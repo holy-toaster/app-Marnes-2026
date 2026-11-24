@@ -1,6 +1,7 @@
 package com.gabriel.estante.ui.busca
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,7 +57,7 @@ import com.gabriel.estante.ui.theme.TextoSecundarioNoCartao
 
 /** Tela de Pesquisa: cria o ViewModel (com a fábrica) e mostra o conteúdo. */
 @Composable
-fun BuscaScreen() {
+fun BuscaScreen(aoAbrirDetalhe: (LivroBusca) -> Unit) {
     val contexto = LocalContext.current.applicationContext
     val viewModel: BuscaViewModel = viewModel(
         factory = BuscaViewModelFactory(
@@ -86,7 +87,7 @@ fun BuscaScreen() {
                         CircularProgressIndicator(Modifier.align(Alignment.Center), color = Ambar)
                     EstadoBusca.SemResultados -> Mensagem("Nenhum livro encontrado. Tente outro título.")
                     is EstadoBusca.Erro -> Erro(e.motivo, aoTentarDeNovo = viewModel::buscar)
-                    is EstadoBusca.Resultados -> ListaResultados(e.livros, viewModel::adicionar)
+                    is EstadoBusca.Resultados -> ListaResultados(e.livros, viewModel::adicionar, aoAbrirDetalhe)
                 }
             }
         }
@@ -153,25 +154,30 @@ private fun Erro(motivo: ErroBusca, aoTentarDeNovo: () -> Unit) {
 }
 
 @Composable
-private fun ListaResultados(livros: List<LivroBusca>, aoAdicionar: (LivroBusca) -> Unit) {
+private fun ListaResultados(
+    livros: List<LivroBusca>,
+    aoAdicionar: (LivroBusca) -> Unit,
+    aoAbrirDetalhe: (LivroBusca) -> Unit
+) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         items(livros, key = { it.olId }) { livro ->
-            CartaoLivro(livro, aoAdicionar = { aoAdicionar(livro) })
+            CartaoLivro(livro, aoAbrir = { aoAbrirDetalhe(livro) }, aoAdicionar = { aoAdicionar(livro) })
         }
     }
 }
 
-// Cartão cinza-claro: capa, título, autor e botão "Adicionar" (tocar no cartão ainda não abre nada)
+// Cartão cinza-claro: capa, título, autor e botão "Adicionar" (tocar no cartão abre os Detalhes)
 @Composable
-private fun CartaoLivro(livro: LivroBusca, aoAdicionar: () -> Unit) {
+private fun CartaoLivro(livro: LivroBusca, aoAbrir: () -> Unit, aoAdicionar: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable(onClick = aoAbrir)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -41,9 +41,13 @@ interface LivroDao {
     @Query("SELECT * FROM livros ORDER BY titulo COLLATE NOCASE")
     fun listarTodos(): Flow<List<Livro>>
 
-    /** Atualiza só o progresso (0 a 100) de um livro, sem mexer nos outros campos. */
-    @Query("UPDATE livros SET progresso = :progresso WHERE id = :id")
-    suspend fun atualizarProgresso(id: Long, progresso: Int)
+    /** Atualiza o progresso (0 a 100) e o status de um livro, sem mexer nos outros campos. */
+    @Query("UPDATE livros SET progresso = :progresso, status = :status WHERE id = :id")
+    suspend fun atualizarProgresso(id: Long, progresso: Int, status: StatusLeitura)
+
+    /** Observa um livro pelo olId: emite null se ele não está na estante e atualiza sozinho. */
+    @Query("SELECT * FROM livros WHERE olId = :olId")
+    fun observarPorOlId(olId: String): Flow<Livro?>
 
     /** Atualiza só a nota e a anotação de um livro, sem mexer nos outros campos. */
     @Query("UPDATE livros SET notaPessoal = :nota, anotacao = :anotacao WHERE id = :id")

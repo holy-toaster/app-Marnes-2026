@@ -18,6 +18,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 // ---------------------------------------------------------------------------
 // Modelos do JSON da Open Library (só os campos que pedimos).
@@ -35,6 +40,14 @@ private data class DocLivro(
     val title: String = "",
     @SerialName("author_name") val autores: List<String> = emptyList(),
     @SerialName("cover_i") val capaId: Long? = null         // id da capa (pode não existir)
+)
+
+// A sinopse ("description") pode vir como texto simples ("Um texto...")
+// ou como objeto ({"type": "/type/text", "value": "Um texto..."}).
+// Por isso lemos como JsonElement e tratamos os dois casos na função.
+@Serializable
+private data class RespostaObra(
+    val description: JsonElement? = null
 )
 
 /**
@@ -80,6 +93,39 @@ class OpenLibraryApi(
         }
     }
 
+    /**
+     * Busca a sinopse da obra (endpoint /works/{id}.json), com o mesmo tratamento de erros da busca.
+     * Se a obra não tem sinopse, devolve Erro(RESPOSTA_VAZIA).
+     */
+    suspend fun buscarSinopse(olId: String): ResultadoSinopse {
+        if (olId.isBlank()) return ResultadoSinopse.Erro(ErroBusca.RESPOSTA_VAZIA)
+
+        return try {
+            val resposta = client.get("$URL_OBRAS/${olId.substringAfterLast('/')}.json")
+
+            if (!resposta.status.isSuccess()) {
+                return ResultadoSinopse.Erro(ErroBusca.ERRO_SERVIDOR)
+            }
+
+            val descricao = resposta.body<RespostaObra>().description
+            val texto = when (descricao) {
+                is JsonPrimitive -> descricao.contentOrNull                       // texto simples
+                is JsonObject -> descricao["value"]?.jsonPrimitive?.contentOrNull // objeto com "value"
+                else -> null
+            }?.trim()
+
+            if (texto.isNullOrEmpty()) {
+                ResultadoSinopse.Erro(ErroBusca.RESPOSTA_VAZIA)
+            } else {
+                ResultadoSinopse.Sucesso(texto)
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            ResultadoSinopse.Erro(e.paraErroBusca())
+        }
+    }
+
     // Transforma o item do JSON no objeto simples que a tela usa
     private fun DocLivro.paraLivroBusca() = LivroBusca(
         olId = key.substringAfterLast('/'),           // "/works/OL45804W" -> "OL45804W"
@@ -103,6 +149,7 @@ class OpenLibraryApi(
 
     companion object {
         private const val URL_BUSCA = "https://openlibrary.org/search.json"
+        private const val URL_OBRAS = "https://openlibrary.org/works"
         private const val LIMITE_RESULTADOS = 20
 
         // A Open Library pede um User-Agent que identifique o app e um contato.

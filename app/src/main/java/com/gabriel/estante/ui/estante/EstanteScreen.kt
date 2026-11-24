@@ -48,7 +48,7 @@ import com.gabriel.estante.ui.theme.TextoSecundarioNoCartao
 
 /** Tela Estante (Home): cria o ViewModel (com a fábrica) e mostra o conteúdo. */
 @Composable
-fun EstanteScreen() {
+fun EstanteScreen(aoAbrirDetalhe: (olId: String) -> Unit) {
     val contexto = LocalContext.current.applicationContext
     val viewModel: EstanteViewModel = viewModel(
         factory = EstanteViewModelFactory(
@@ -81,7 +81,7 @@ fun EstanteScreen() {
                 modifier = Modifier.fillMaxSize().padding(top = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(livros, key = { it.id }) { livro -> CartaoLivro(livro) }
+                items(livros, key = { it.id }) { livro -> CartaoLivro(livro, aoClicar = { aoAbrirDetalhe(livro.olId) }) }
             }
         }
     }
@@ -111,14 +111,15 @@ private fun Chips(selecionado: FiltroEstante, aoSelecionar: (FiltroEstante) -> U
 }
 
 // Cartão cinza-claro: capa, título, autor e barra de progresso com o percentual.
-// Tocar no cartão ainda não faz nada (a tela de Detalhes vem na próxima etapa).
+// Tocar no cartão abre a tela de Detalhes.
 @Composable
-private fun CartaoLivro(livro: Livro) {
+private fun CartaoLivro(livro: Livro, aoClicar: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(Cartao)
+            .clickable(onClick = aoClicar)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

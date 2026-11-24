@@ -21,3 +21,9 @@ sealed interface ResultadoBusca {
     data class Sucesso(val livros: List<LivroBusca>) : ResultadoBusca
     data class Erro(val motivo: ErroBusca) : ResultadoBusca
 }
+
+/** Resultado da busca da sinopse: o texto ou o motivo do erro (RESPOSTA_VAZIA = obra sem sinopse). */
+sealed interface ResultadoSinopse {
+    data class Sucesso(val texto: String) : ResultadoSinopse
+    data class Erro(val motivo: ErroBusca) : ResultadoSinopse
+}

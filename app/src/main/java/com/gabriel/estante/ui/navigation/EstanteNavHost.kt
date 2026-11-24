@@ -1,5 +1,6 @@
 package com.gabriel.estante.ui.navigation
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,12 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.gabriel.estante.ui.busca.BuscaScreen
+import com.gabriel.estante.ui.detalhe.DetalheScreen
 import com.gabriel.estante.ui.estante.EstanteScreen
 import com.gabriel.estante.ui.theme.Ambar
 import com.gabriel.estante.ui.theme.BarraNavegacao
@@ -74,8 +78,45 @@ fun EstanteNavHost() {
             startDestination = Destino.ESTANTE.rota,
             modifier = Modifier.padding(padding)
         ) {
-            composable(Destino.ESTANTE.rota) { EstanteScreen() }
-            composable(Destino.PESQUISA.rota) { BuscaScreen() }
+            composable(Destino.ESTANTE.rota) {
+                // Livro da estante já está no Room: basta o olId
+                EstanteScreen(aoAbrirDetalhe = { olId -> navController.navigate("detalhe/$olId") })
+            }
+            composable(Destino.PESQUISA.rota) {
+                BuscaScreen(aoAbrirDetalhe = { livro ->
+                    // Livro da Pesquisa pode não estar no Room: leva também título, autor e capa
+                    navController.navigate(
+                        "detalhe/${livro.olId}" +
+                            "?titulo=${Uri.encode(livro.titulo)}" +
+                            "&autor=${Uri.encode(livro.autor)}" +
+                            "&capaUrl=${Uri.encode(livro.capaUrl.orEmpty())}"
+                    )
+                })
+            }
+            // FORMA ESCOLHIDA PARA PASSAR DADOS: tudo na própria rota. O olId é obrigatório
+            // (parte do caminho) e título, autor e capaUrl são argumentos opcionais de texto
+            // (depois do "?"), vazios por padrão. É a forma mais simples: sem objeto
+            // compartilhado entre telas e sem ler o banco só para navegar. O Uri.encode acima
+            // protege caracteres como "/" e "&" (a URL da capa tem "/" e ":"); a Navigation
+            // decodifica sozinha ao ler os argumentos.
+            composable(
+                route = "detalhe/{olId}?titulo={titulo}&autor={autor}&capaUrl={capaUrl}",
+                arguments = listOf(
+                    navArgument("olId") { type = NavType.StringType },
+                    navArgument("titulo") { type = NavType.StringType; defaultValue = "" },
+                    navArgument("autor") { type = NavType.StringType; defaultValue = "" },
+                    navArgument("capaUrl") { type = NavType.StringType; defaultValue = "" }
+                )
+            ) { entrada ->
+                val args = entrada.arguments
+                DetalheScreen(
+                    olId = args?.getString("olId").orEmpty(),
+                    titulo = args?.getString("titulo").orEmpty(),
+                    autor = args?.getString("autor").orEmpty(),
+                    capaUrl = args?.getString("capaUrl")?.ifEmpty { null },
+                    aoVoltar = { navController.popBackStack() }
+                )
+            }
             composable(Destino.MAIS_AVALIADOS.rota) { TelaTemporaria("Mais Avaliados") }
         }
     }

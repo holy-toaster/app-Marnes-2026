@@ -5,6 +5,7 @@ import com.gabriel.estante.data.local.LivroDao
 import com.gabriel.estante.data.local.StatusLeitura
 import com.gabriel.estante.data.remote.OpenLibraryApi
 import com.gabriel.estante.data.remote.ResultadoBusca
+import com.gabriel.estante.data.remote.ResultadoSinopse
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -50,9 +51,17 @@ class LivroRepository(
 
     suspend fun buscarPorId(id: Long): Livro? = dao.buscarPorId(id)
 
-    /** Atualiza só o progresso do livro, mantendo o valor entre 0 e 100. */
-    suspend fun atualizarProgresso(id: Long, progresso: Int) =
-        dao.atualizarProgresso(id, progresso.coerceIn(0, 100))
+    /** Observa um livro pelo olId (null = não está na estante). */
+    fun observarPorOlId(olId: String): Flow<Livro?> = dao.observarPorOlId(olId)
+
+    /** Busca a sinopse da obra na Open Library. Nunca lança exceção. */
+    suspend fun buscarSinopse(olId: String): ResultadoSinopse = api.buscarSinopse(olId)
+
+    /** Atualiza o progresso (mantido entre 0 e 100) e ajusta o status de acordo com ele. */
+    suspend fun atualizarProgresso(id: Long, progresso: Int) {
+        val valido = progresso.coerceIn(0, 100)
+        dao.atualizarProgresso(id, valido, StatusLeitura.doProgresso(valido))
+    }
 
     /** Atualiza só a nota (0 a 5) e a anotação do livro. */
     suspend fun atualizarNotaEAnotacao(id: Long, nota: Int, anotacao: String) =
