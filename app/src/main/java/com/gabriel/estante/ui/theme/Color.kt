@@ -2,10 +2,12 @@ package com.gabriel.estante.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Cores tiradas das imagens em docs/design
+val Fundo = Color(0xFF1E1F21)          // fundo das telas (cinza bem escuro)
+val Cartao = Color(0xFFDAD7D2)         // cartões cinza-claros
+val TextoNoCartao = Color(0xFF1E1F21)  // texto escuro sobre os cartões
+val TextoSecundarioNoCartao = Color(0xFF5E5C59)
+val Ambar = Color(0xFFE8A044)          // cor de destaque
+val BarraNavegacao = Color(0xFF000000) // barra inferior preta
+val TextoClaro = Color(0xFFFFFFFF)     // texto sobre o fundo escuro
+val CapaPadrao = Color(0xFF8F0F10)     // cor da capa enquanto carrega / sem capa
