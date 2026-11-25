@@ -52,6 +52,9 @@ import com.gabriel.estante.data.local.EstanteDatabase
 import com.gabriel.estante.data.local.Livro
 import com.gabriel.estante.data.local.StatusLeitura
 import com.gabriel.estante.data.repository.LivroRepository
+import com.gabriel.estante.data.repository.NotaExemplo
+import com.gabriel.estante.data.repository.NotasExemploRepository
+import com.gabriel.estante.data.repository.comoNota
 import com.gabriel.estante.ui.theme.Ambar
 import com.gabriel.estante.ui.theme.CapaPadrao
 import com.gabriel.estante.ui.theme.Cartao
@@ -78,11 +81,13 @@ fun DetalheScreen(
         key = olId,
         factory = DetalheViewModelFactory(
             LivroRepository(EstanteDatabase.getInstance(contexto).livroDao()),
+            NotasExemploRepository(contexto),
             olId, titulo, autor, capaUrl
         )
     )
     val estado by viewModel.estado.collectAsState()
     val sinopse by viewModel.sinopse.collectAsState()
+    val notaExemplo by viewModel.notaExemplo.collectAsState()
     val livro = estado.livro
 
     var mostrarAvaliacao by remember { mutableStateOf(false) }
@@ -94,7 +99,8 @@ fun DetalheScreen(
             titulo = livro?.titulo ?: titulo,
             autor = livro?.autor ?: autor,
             capaUrl = livro?.capaUrl ?: capaUrl,
-            aoVoltar = aoVoltar
+            aoVoltar = aoVoltar,
+            notaExemplo = notaExemplo
         ) {
             // Só mostra o botão depois que o Room respondeu, para não piscar o estado errado
             if (estado.carregado) {
@@ -108,6 +114,8 @@ fun DetalheScreen(
 
         Column(Modifier.padding(horizontal = 20.dp, vertical = 20.dp)) {
             SecaoSinopse(sinopse)
+            // Só aparece se o livro está nos dados de exemplo
+            notaExemplo?.let { SecaoResenha(it) }
 
             if (livro != null) {
                 Progresso(livro, aoSalvar = viewModel::salvarProgresso)
@@ -156,6 +164,7 @@ private fun Topo(
     autor: String,
     capaUrl: String?,
     aoVoltar: () -> Unit,
+    notaExemplo: NotaExemplo?,
     botao: @Composable () -> Unit
 ) {
     Column(
@@ -195,7 +204,47 @@ private fun Topo(
             color = TextoSecundarioNoCartao,
             textAlign = TextAlign.Center
         )
+        // Avaliações / Leitores / Críticos: só para livros dos dados de exemplo
+        if (notaExemplo != null) {
+            Row(
+                Modifier.padding(top = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                Estatistica("Avaliações", "%,d".format(java.util.Locale("pt", "BR"), notaExemplo.qtdAvaliacoes))
+                Estatistica("Leitores", notaExemplo.notaLeitores.comoNota())
+                Estatistica("Críticos", notaExemplo.notaCriticos.comoNota())
+            }
+        }
         Box(Modifier.padding(top = 16.dp)) { botao() }
+    }
+}
+
+// Um rótulo pequeno com o valor embaixo
+@Composable
+private fun Estatistica(rotulo: String, valor: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(rotulo, fontSize = 13.sp, color = TextoSecundarioNoCartao)
+        Text(valor, fontSize = 13.sp, color = TextoSecundarioNoCartao)
+    }
+}
+
+// "Resenhas da crítica": resenha curta de exemplo, sem atribuir a ninguém real
+@Composable
+private fun SecaoResenha(nota: NotaExemplo) {
+    Column(Modifier.padding(bottom = 20.dp)) {
+        Text("Resenhas da crítica", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            nota.resenha,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Justify,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+        Text(
+            "Resenha de exemplo",
+            fontSize = 11.sp,
+            color = Color.White.copy(alpha = 0.6f),
+            modifier = Modifier.padding(top = 4.dp)
+        )
     }
 }
 

@@ -1,0 +1,102 @@
+[
+  {
+    "olId": "OL1003040W",
+    "titulo": "Dom Casmurro",
+    "autor": "Machado de Assis",
+    "capaId": 647501,
+    "notaLeitores": 4.5,
+    "qtdAvaliacoes": 18420,
+    "notaCriticos": 4.8,
+    "resenha": "Ciúme, dúvida e memória se misturam em um narrador que talvez não mereça nossa confiança. Curto e muito comentado."
+  },
+  {
+    "olId": "OL1168083W",
+    "titulo": "Nineteen Eighty-Four",
+    "autor": "George Orwell",
+    "capaId": 9267242,
+    "notaLeitores": 4.7,
+    "qtdAvaliacoes": 52310,
+    "notaCriticos": 4.9,
+    "resenha": "Uma distopia sobre vigilância e manipulação da verdade que continua incômoda. Leitura tensa, difícil de largar."
+  },
+  {
+    "olId": "OL35792570W",
+    "titulo": "O Pequeno Príncipe",
+    "autor": "Antoine de Saint-Exupéry",
+    "capaId": 15231561,
+    "notaLeitores": 4.6,
+    "qtdAvaliacoes": 61250,
+    "notaCriticos": 4.4,
+    "resenha": "Uma fábula simples sobre amizade e perda, que muda de sentido conforme a idade de quem lê."
+  },
+  {
+    "olId": "OL274505W",
+    "titulo": "Cien años de soledad",
+    "autor": "Gabriel García Márquez",
+    "capaId": 12627383,
+    "notaLeitores": 4.4,
+    "qtdAvaliacoes": 39870,
+    "notaCriticos": 4.8,
+    "resenha": "A saga de uma família em Macondo, com realismo mágico e muitos nomes parecidos. Vale a paciência."
+  },
+  {
+    "olId": "OL82563W",
+    "titulo": "Harry Potter and the Philosopher's Stone",
+    "autor": "J. K. Rowling",
+    "capaId": 15155833,
+    "notaLeitores": 4.8,
+    "qtdAvaliacoes": 98400,
+    "notaCriticos": 4.2,
+    "resenha": "Porta de entrada para um mundo de magia, com ritmo leve e personagens que ficam na memória."
+  },
+  {
+    "olId": "OL27448W",
+    "titulo": "The Lord of the Rings",
+    "autor": "J.R.R. Tolkien",
+    "capaId": 14625765,
+    "notaLeitores": 4.7,
+    "qtdAvaliacoes": 71560,
+    "notaCriticos": 4.7,
+    "resenha": "Uma jornada épica, com mundo riquíssimo e descrições longas. Recompensa quem gosta de aventura detalhada."
+  },
+  {
+    "olId": "OL66554W",
+    "titulo": "Pride and Prejudice",
+    "autor": "Jane Austen",
+    "capaId": 14348537,
+    "notaLeitores": 4.5,
+    "qtdAvaliacoes": 64100,
+    "notaCriticos": 4.6,
+    "resenha": "Romance de diálogos afiados e ironia social, com uma protagonista que prende do começo ao fim."
+  },
+  {
+    "olId": "OL27482W",
+    "titulo": "The Hobbit",
+    "autor": "J.R.R. Tolkien",
+    "capaId": 14627509,
+    "notaLeitores": 4.6,
+    "qtdAvaliacoes": 58730,
+    "notaCriticos": 4.5,
+    "resenha": "Aventura mais leve que a trilogia, ótima para começar. Tem humor, perigo e um final satisfatório."
+  },
+  {
+    "olId": "OL1003017W",
+    "titulo": "Memórias póstumas de Brás Cubas",
+    "autor": "Machado de Assis",
+    "capaId": 123152,
+    "notaLeitores": 4.3,
+    "qtdAvaliacoes": 15940,
+    "notaCriticos": 4.7,
+    "resenha": "Um narrador morto conta a própria vida com sarcasmo. Capítulos curtos e uma crítica social bem-humorada."
+  },
+  {
+    "olId": "OL796465W",
+    "titulo": "O Alquimista",
+    "autor": "Paulo Coelho",
+    "capaId": 7414780,
+    "notaLeitores": 4.0,
+    "qtdAvaliacoes": 47200,
+    "notaCriticos": 3.6,
+    "resenha": "Fábula de busca pessoal fácil de ler, com frases inspiradoras. Agrada mais a quem procura leitura leve."
+  }
+]

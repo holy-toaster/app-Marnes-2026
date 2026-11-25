@@ -1,10 +1,7 @@
 package com.gabriel.estante.ui.navigation
 
 import android.net.Uri
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
@@ -14,10 +11,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -31,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import com.gabriel.estante.ui.busca.BuscaScreen
 import com.gabriel.estante.ui.detalhe.DetalheScreen
 import com.gabriel.estante.ui.estante.EstanteScreen
+import com.gabriel.estante.ui.ranking.RankingScreen
 import com.gabriel.estante.ui.theme.Ambar
 import com.gabriel.estante.ui.theme.BarraNavegacao
 
@@ -46,6 +42,16 @@ private enum class Destino(val rota: String, val nome: String, val icone: ImageV
 fun EstanteNavHost() {
     val navController = rememberNavController()
     val rotaAtual = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    // Abre a tela de Detalhes levando olId, título, autor e capa (vazios se não houver)
+    fun abrirDetalhe(olId: String, titulo: String, autor: String, capaUrl: String?) {
+        navController.navigate(
+            "detalhe/$olId" +
+                "?titulo=${Uri.encode(titulo)}" +
+                "&autor=${Uri.encode(autor)}" +
+                "&capaUrl=${Uri.encode(capaUrl.orEmpty())}"
+        )
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -85,12 +91,7 @@ fun EstanteNavHost() {
             composable(Destino.PESQUISA.rota) {
                 BuscaScreen(aoAbrirDetalhe = { livro ->
                     // Livro da Pesquisa pode não estar no Room: leva também título, autor e capa
-                    navController.navigate(
-                        "detalhe/${livro.olId}" +
-                            "?titulo=${Uri.encode(livro.titulo)}" +
-                            "&autor=${Uri.encode(livro.autor)}" +
-                            "&capaUrl=${Uri.encode(livro.capaUrl.orEmpty())}"
-                    )
+                    abrirDetalhe(livro.olId, livro.titulo, livro.autor, livro.capaUrl)
                 })
             }
             // FORMA ESCOLHIDA PARA PASSAR DADOS: tudo na própria rota. O olId é obrigatório
@@ -117,15 +118,9 @@ fun EstanteNavHost() {
                     aoVoltar = { navController.popBackStack() }
                 )
             }
-            composable(Destino.MAIS_AVALIADOS.rota) { TelaTemporaria("Mais Avaliados") }
+            composable(Destino.MAIS_AVALIADOS.rota) {
+                RankingScreen(aoAbrirDetalhe = { l -> abrirDetalhe(l.olId, l.titulo, l.autor, l.capaUrl) })
+            }
         }
-    }
-}
-
-// Tela provisória: só mostra o nome, até ser implementada
-@Composable
-private fun TelaTemporaria(nome: String) {
-    Box(Modifier.fillMaxSize().statusBarsPadding(), contentAlignment = Alignment.Center) {
-        Text(nome, style = MaterialTheme.typography.headlineLarge)
     }
 }

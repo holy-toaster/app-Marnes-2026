@@ -7,6 +7,8 @@ import com.gabriel.estante.data.local.Livro
 import com.gabriel.estante.data.local.StatusLeitura
 import com.gabriel.estante.data.remote.ResultadoSinopse
 import com.gabriel.estante.data.repository.LivroRepository
+import com.gabriel.estante.data.repository.NotaExemplo
+import com.gabriel.estante.data.repository.NotasExemploRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,6 +35,7 @@ data class EstadoDetalhe(
 
 class DetalheViewModel(
     private val repositorio: LivroRepository,
+    private val notasExemplo: NotasExemploRepository,
     private val olId: String,
     // Dados vindos da navegação: só servem para livros que ainda não estão no Room
     private val titulo: String,
@@ -49,8 +52,13 @@ class DetalheViewModel(
     private val _sinopse = MutableStateFlow<EstadoSinopse>(EstadoSinopse.Carregando)
     val sinopse: StateFlow<EstadoSinopse> = _sinopse
 
+    // Notas e resenha de exemplo; fica null se o livro não está no JSON (a tela esconde essas partes)
+    private val _notaExemplo = MutableStateFlow<NotaExemplo?>(null)
+    val notaExemplo: StateFlow<NotaExemplo?> = _notaExemplo
+
     init {
         carregarSinopse()
+        viewModelScope.launch { _notaExemplo.value = notasExemplo.buscarPorOlId(olId) }
     }
 
     private fun carregarSinopse() {
@@ -115,6 +123,7 @@ class DetalheViewModel(
 /** Fábrica simples (sem Hilt) que cria o DetalheViewModel com o repositório e os dados do livro. */
 class DetalheViewModelFactory(
     private val repositorio: LivroRepository,
+    private val notasExemplo: NotasExemploRepository,
     private val olId: String,
     private val titulo: String,
     private val autor: String,
@@ -123,6 +132,6 @@ class DetalheViewModelFactory(
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         require(modelClass.isAssignableFrom(DetalheViewModel::class.java)) { "ViewModel desconhecido" }
-        return DetalheViewModel(repositorio, olId, titulo, autor, capaUrl) as T
+        return DetalheViewModel(repositorio, notasExemplo, olId, titulo, autor, capaUrl) as T
     }
 }
